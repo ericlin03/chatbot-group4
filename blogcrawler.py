@@ -40,17 +40,17 @@ def blogcrawler(search_name):
     count=0
     for data in objpost:
         if count==0:
-            if search_name in data.text:
-                blog_from.append('周花花')
-                #print(data.find('a').text)
-                name_list.append(data.find('a').text)
-                #print(data.find('a').get('href'))
-                post_url_list.append(data.find('a').get('href'))
-                #print(data.find('img').get('src'))
-                img_url_list.append(data.find('img').get('src'))
-                #print('---')
-                count+=1
-    
+            #if search_name in data.text:
+            blog_from.append('周花花')
+            #print(data.find('a').text)
+            name_list.append(data.find('a').text)
+            #print(data.find('a').get('href'))
+            post_url_list.append(data.find('a').get('href'))
+            #print(data.find('img').get('src'))
+            img_url_list.append(data.find('img').get('src'))
+            #print('---')
+            count+=1
+
     
     
    
@@ -67,17 +67,17 @@ def blogcrawler(search_name):
     count=0
     for data in objpost:
         if count==0:
-            if search_name in data.text:
-                blog_from.append('愛吃鬼')
-                #print(data.text)
-                name_list.append(data.text)
-                #print(data.parent.parent.get('href'))
-                post_url_list.append(data.parent.parent.get('href'))
-                #print(data.parent.find('img').get('src'))
-                img_url_list.append(data.parent.find('img').get('src'))
-                #print('---')
-                count+=1
-    
+            #if search_name in data.text:
+            blog_from.append('愛吃鬼')
+            #print(data.text)
+            name_list.append(data.text)
+            #print(data.parent.parent.get('href'))
+            post_url_list.append(data.parent.parent.get('href'))
+            #print(data.parent.find('img').get('src'))
+            img_url_list.append(data.parent.find('img').get('src'))
+            #print('---')
+            count+=1
+
   
    
    
