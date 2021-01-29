@@ -74,15 +74,15 @@ def googlemaps_search_nearby(x,y):
     return restaurants_list
   
 # 供外界call的function，回傳格式：[{},{},...,{}]
-def googlemaps_API(place):
+def googlemaps_API(place, money_status):
     x, y = googlemaps_search_location(place)
     restaurants = googlemaps_search_nearby(x,y)
-    # if(0 < money_condition <= 200):
-    #     restaurants = list(filter(lambda x: x['price_level']==1, restaurants))
-    # elif(200 <= money_condition <= 850):
-    #     restaurants = list(filter(lambda x: x['price_level']==2, restaurants))
-    # else:
-    #     restaurants = list(filter(lambda x: x['price_level']==3, restaurants))
+    if(money_status == 1):
+        restaurants = list(filter(lambda x: x['price_level']==1, restaurants))
+    elif(money_status == 2):
+        restaurants = list(filter(lambda x: x['price_level']==2 or x['price_level']==1, restaurants))
+    else:
+        restaurants = list(filter(lambda x: x['price_level']==3 or x['price_level']==2 or x['price_level']==1, restaurants))
 
     return restaurants
 
@@ -90,8 +90,3 @@ def googlemaps_API(place):
 def show_photo(ref):
     url = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference='+ ref +'&key='+API_key
     return url
-
-# result = googlemaps_API('彰化高中', 23)
-# for i in range(len(result)):
-#     print(result[i]['name'])
-#     print(result[i]['price_level'])
