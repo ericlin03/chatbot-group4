@@ -18,7 +18,7 @@ class history:
         counter = self.db_func.DB_query(query)
         counter = int(counter[0])
         add_query = 'UPDATE user_info SET recently_' + str(counter) + '=\'' + restaurant_name + '\' WHERE ID=\'' + user_id + '\''
-        counter += 1
+        counter = (counter + 1) % 10
         counter_query = 'UPDATE user_info SET counter=\'' + str(counter) + '\' WHERE ID=\'' + user_id + '\''
         self.db_func.DB_insert(add_query)
         self.db_func.DB_insert(counter_query)

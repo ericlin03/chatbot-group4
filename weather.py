@@ -24,7 +24,7 @@ def todaytop3eat():
     else:
         food = weatherfood["hot"]
     
-    ii = random.choices(food, k=3)
+    ii = random.sample(food, k=3)
     print(degree, ii)
     tod = [degree, ii]
     return tod
