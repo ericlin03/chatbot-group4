@@ -75,7 +75,7 @@ class MyBot(ActivityHandler):
             todaylist = []
             for tt in range(3):
                 restaurants_dict = googlemaps_API("北車", 3, todayrecom[1][tt])
-                todaylist.append(restaurants_list.append(
+                todaylist.append(
                             CardFactory.hero_card(
                                 HeroCard(
                                     title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), 
@@ -86,8 +86,8 @@ class MyBot(ActivityHandler):
                                     CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")]
                                 )
                             )
-                        ))
-            msg = MessageFactory.carousel(today_list)
+                        )
+            msg = MessageFactory.carousel(todaylist)
             await turn_context.send_activity(msg)
         elif "加入最愛" in turn_context.activity.text: ## add favorite button
             rest_name = turn_context.activity.text.split("_")[0]
