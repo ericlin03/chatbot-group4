@@ -4,7 +4,7 @@ from flask import Config
 from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint, QnAMakerOptions
 from botbuilder.ai.luis import LuisApplication, LuisRecognizer, LuisPredictionOptions
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory, RecognizerResult
-from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes, ThumbnailCard
+from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes
 from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo, googlemaps_search_location, find_position_with_xy, googlemaps_search_nearby
 from sql import DB_function
@@ -74,6 +74,7 @@ class MyBot(ActivityHandler):
         ## get user input and make response
         luis_result = recognizer_result.properties["luisResult"]
         entity=''
+<<<<<<< HEAD
         # if('我想吃咖啡廳' == turn_context.activity.text):
         #     entity='咖啡廳'
         # if('我想吃牛排' == turn_context.activity.text):
@@ -94,32 +95,33 @@ class MyBot(ActivityHandler):
             else:
                 entity = str(entities_list[0]+'^'+entities_list[1])
 
+=======
+            
+>>>>>>> 665e7175334f7225a75fad2f2918d58b0de0f107
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
     # 個人化推薦
         elif turn_context.activity.text == '個人化推薦':
             todayrecom = todaytop3eat()
-            await turn_context.send_activity("今天最低溫🌡為 %s, 為您推薦以下料理："%todayrecom[0])
+            await turn_context.send_activity("今天最低溫為 %s, 為您推薦以下料理："%todayrecom[0])
             todaylist = []
             for tt in range(3):
                 restaurants_dict = googlemaps_API("北車", 3, todayrecom[1][tt])
-                print(restaurants_dict)
-                todaylist.append(
+                todaylist.append(restaurants_list.append(
                             CardFactory.hero_card(
                                 HeroCard(
-                                    title=restaurants_dict[0]['name'], text='👍🏼推薦指數 : ' + str(restaurants_dict[0]['rating']), 
+                                    title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), 
                                     images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], 
-                                    buttons=[CardAction(type="openUrl",title="🗺地圖",
+                                    buttons=[CardAction(type="openUrl",title="地圖",
                                     value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), 
                                     CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), 
-                                    CardAction(type="imBack",title="加入我的最愛❤",value=restaurants_dict[0]['name']+"_加入最愛")]
+                                    CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")]
                                 )
                             )
-                        )
-            msg = MessageFactory.carousel(todaylist)
+                        ))
+            msg = MessageFactory.carousel(today_list)
             await turn_context.send_activity(msg)
-
         elif "加入最愛" in turn_context.activity.text: ## add favorite button
             rest_name = turn_context.activity.text.split("_")[0]
             message = self.favor.add_favorite(user_id, rest_name)
@@ -146,15 +148,37 @@ class MyBot(ActivityHandler):
                 fav_list = []
                 for length in range(len(res)):
                     rest_name = res[length]
-                    rest_location = find_position_with_xy(rest_name)
-                    fav_list.append(CardFactory.thumbnail_card(ThumbnailCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type='openUrl', title='導航', value="https://www.google.com/maps/search/?api=1&query=" + str(rest_name))])))
+                    rest_location, rest_id = find_position_with_xy(rest_name)
+                    x, y = googlemaps_search_location(rest_name)
+                    print(x)
+                    # fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type='openUrl', title='導航', value="https://www.google.com/maps/search/?api=1&query=" + str(x) + "," + str(y) +"&query_place_id="+str(rest_id)])))
                     # fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type="openUrl",title="地圖",
                     #             value="https://www.google.com/maps/search/?api=1&query=" + rest_name)])))
+                    # value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id']
                 message = MessageFactory.carousel(fav_list)                   
+        elif "加入最愛" in turn_context.activity.text: ## add favorite button
+            rest_name = turn_context.activity.text.split("_")[0]
+            message = self.favor.add_favorite(user_id, rest_name)
+            await turn_context.send_activity(message)
+        # 歷史紀錄
+        elif turn_context.activity.text == '瀏覽紀錄':
+            res = self.history.get_history(user_id)
+            print(user_id)
+            if (res is None):
+                await turn_context.send_activity("還沒有瀏覽紀錄，趕快搜尋餐廳吧~")
+            else:
+                history_list = []
+                for length in range(len(res)):
+                    rest_name = res[length]
+                    rest_location = find_position_with_xy(rest_name)
+                    history_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location)))
+                message = MessageFactory.carousel(history_list)                   
                 await turn_context.send_activity(message)
-        elif "IG" in turn_context.activity.text:
+        # IG
+        elif "_IG" in turn_context.activity.text:
             hashtag = turn_context.activity.text.split("_")[0].split(' ')[0].split('-')[0].split('/')[0].split("'")[0].split('&')[0]
             url = 'https://www.instagram.com/explore/tags/'+hashtag
+
             await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳的IG熱門貼文...")
             message = MessageFactory.carousel([
                 CardFactory.hero_card(HeroCard(title=hashtag+'的IG熱門文章',images=[CardImage(url='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB1DfQKJ-vfC16ybbNPP0N7FVVV6bNEC3W9Q&usqp=CAU')], buttons=[CardAction(type="openUrl",title="前往IG熱門文章",value=url)]))
@@ -163,15 +187,14 @@ class MyBot(ActivityHandler):
             await turn_context.send_activity(message) 
         # 找評論
 
-        elif "評論" in turn_context.activity.text:
+        elif "評論"in turn_context.activity.text:
             await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳評論...")
             # 展宏的func
             re = webcrawl(turn_context.activity.text)
             # 佑誠的func
             blog_re=[]
             blog_re = blogcrawler(turn_context.activity.text)
-            print(re)
-            print(blog_re)
+
 
             review_list = []
             for index in range(len(blog_re)):
@@ -184,16 +207,44 @@ class MyBot(ActivityHandler):
                 message = MessageFactory.carousel(review_list)   
             else:
                 message = "未查詢到這間餐廳的相關評論文章喔～ 歡迎您發布首則評論！"
-            
             rest_name = turn_context.activity.text.split("_")[0]
-            self.history.add_history(user_id, rest_name)
+            # self.history.add_histsory(user_id, rest_name)
 
             message = MessageFactory.carousel(review_list)                   
             await turn_context.send_activity(message)
+
+            # 書文的func
+
+            # line address
+        elif ("{" in turn_context.activity.text and "}" in turn_context.activity.text):
+            line_address_json = json.loads(turn_context.activity.text)
+            print('line_address_json', line_address_json)
+            x = line_address_json['latitude']
+            y = line_address_json['longitude']
+            restaurants_dict = googlemaps_search_nearby(x ,y ,'steak')
+            # 沒有餐廳的狀況
+            if(len(restaurants_dict) == 0):
+                message = "您附近沒有相對應的餐廳可以推薦呦，輸入『吃』來繼續👀"   
+            else:
+                restaurants_list=[]
+                for i in range(len(restaurants_dict)):
+                    restaurants_list.append(
+                        CardFactory.hero_card(
+                            HeroCard(
+                                title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating'])+ "👍", 
+                                images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
+                                buttons=[CardAction(type="openUrl",title="地圖",
+                                value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
+                                CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
+                                CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
+                            )
+                    ))
+                    if(i==10):
+                        break
+
+                message = MessageFactory.carousel(restaurants_list)                   
+                await turn_context.send_activity(message)
         else:
-            # 我的最愛
-            # IGluis_result = recognizer_result.properties["luisResult"]
-            entity=''
             if luis_result.entities:
                 entities_list =[]
                 for ll in luis_result.entities:
@@ -204,7 +255,9 @@ class MyBot(ActivityHandler):
                 print(len(entities_list))
                 if len(entities_list) == 1:
                     entity = entities_list[0]
+                # two entites situation
                 else:
+<<<<<<< HEAD
                     entity = str(entities_list[0]+'^'+entities_list[1])
 
 
@@ -288,6 +341,23 @@ class MyBot(ActivityHandler):
                     message = MessageFactory.carousel(restaurants_list)                   
                     await turn_context.send_activity(message)
 
+=======
+                    entity = entities_list[0]+'^'+entities_list[1]
+                    print("double entity:", entity)
+
+            if entity == '':
+                message = MessageFactory.carousel([
+                    CardFactory.hero_card(
+                    HeroCard( title="無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉"
+                    , subtitle= '請選擇您想吃的類型： 😗'
+                    , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
+                    , CardAction(type="imBack",title="牛排",value="我想吃牛排")
+                    , CardAction(type="imBack",title="火鍋",value="我想吃火鍋")]
+                    ))
+                ])
+                await turn_context.send_activity(message)
+                print('entity:', entity)
+>>>>>>> 665e7175334f7225a75fad2f2918d58b0de0f107
 
 
             elif intent == "使用者食物類別" and "_$" not in turn_context.activity.text and "_IG" not in turn_context.activity.text:      
@@ -328,7 +398,7 @@ class MyBot(ActivityHandler):
         
                  # 沒有餐廳的狀況
                 if(len(restaurants_dict) == 0):
-                    message = "您附近沒有相對應的餐廳可以推薦呦，輸入『吃』來繼續👀"   
+                    message = "您附近沒有相對應的餐廳可以推薦呦，輸入『我想吃...』來繼續👀"   
                 else:
                     restaurants_list=[]
                     for i in range(len(restaurants_dict)):
@@ -361,7 +431,11 @@ class MyBot(ActivityHandler):
                     money_status = 3
                     msg = msg.replace('_$$$', '')
                 msg = msg.replace('_$', '')
+                msg = msg.replace('_', '')
                 msg = msg.replace('我想吃', '')
+                msg = msg.replace('我想喝', '')
+                msg = msg.replace('我要吃', '')
+                msg = msg.replace('我要喝', '')
                 msg = msg.replace('我在', '')
                 if(intent == '使用者食物類別'):
                     restaurants_dict = googlemaps_API("北車", money_status, msg)
@@ -372,8 +446,9 @@ class MyBot(ActivityHandler):
                 print('money_status:', money_status)
                 print('msg:', msg)
                 # 沒有餐廳的狀況
-                if(len(restaurants_dict) == 0):
-                    message = "您附近沒有相對應的餐廳可以推薦呦，輸入『吃』來繼續👀"   
+                if not restaurants_dict:
+                    message = "您附近沒有相對應的餐廳可以推薦呦，輸入『我想吃...』來繼續👀" 
+                    await turn_context.send_activity(message)  
                 else:
                     # good_list = opendata_earth.get_earth_data()
                     # vegetable_list = opendata_vegetable.get_vege_data()
@@ -393,6 +468,9 @@ class MyBot(ActivityHandler):
                                 )
                             )
                         )
+              
+                        
+       
                         if(i == 10):
                             break
 
@@ -401,7 +479,6 @@ class MyBot(ActivityHandler):
                 
             elif turn_context.activity.address!='':
                 turn_context.send_activity(turn_context.activity.address)
-                
             # non-type
             else:
                 message = '不好意思，我聽不太明白，請說的具體一點'
