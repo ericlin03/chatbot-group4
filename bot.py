@@ -235,21 +235,8 @@ class MyBot(ActivityHandler):
                     entity = entities_list[0]+'^'+entities_list[1]
                     print("double entity:", entity)
             entity = entity.replace("\x08",'')
-            if entity == '':
-                message = MessageFactory.carousel([
-                    CardFactory.hero_card(
-                    HeroCard( title="無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉"
-                    , subtitle= '請選擇您想吃的類型： 😗'
-                    , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
-                    , CardAction(type="imBack",title="牛排",value="我想吃牛排")
-                    , CardAction(type="imBack",title="火鍋",value="我想吃火鍋")]
-                    ))
-                ])
-                await turn_context.send_activity(message)
-                print('entity:', entity)
-
-
-            elif intent == "使用者食物類別" and "_$" not in turn_context.activity.text and "_IG" not in turn_context.activity.text:      
+            
+            if intent == "使用者食物類別" and "_$" not in turn_context.activity.text and "_IG" not in turn_context.activity.text:      
 
                 message = MessageFactory.carousel([
                         CardFactory.hero_card(
@@ -266,7 +253,10 @@ class MyBot(ActivityHandler):
        
                 # await turn_context.send_activity(msg)
 
-            elif intent == "使用者地理位置" and "_$" not in turn_context.activity.text and "_IG" not in turn_context.activity.text:              
+            elif intent == "使用者地理位置" and "_$" not in turn_context.activity.text and "_IG" not in turn_context.activity.text:
+                if entity == "":
+                    entity = turn_context.activity.text 
+                    print(entity)             
                 message = MessageFactory.carousel([
                         CardFactory.hero_card(
                         HeroCard(title='您的所在位置為：' + str(entity)
@@ -329,7 +319,7 @@ class MyBot(ActivityHandler):
                 if(intent == '使用者食物類別'):
                     restaurants_dict = googlemaps_API("北車", money_status, msg)
                     print(restaurants_dict)
-                if(intent == '使用者地理位置'):
+                elif(intent == '使用者地理位置'):
                     restaurants_dict = googlemaps_API(msg, money_status, '')
                     print(restaurants_dict)
                 print('money_status:', money_status)
@@ -370,7 +360,15 @@ class MyBot(ActivityHandler):
                 turn_context.send_activity(turn_context.activity.address)
             # non-type
             else:
-                message = '不好意思，我聽不太明白，請說的具體一點'
+                message = MessageFactory.carousel([
+                    CardFactory.hero_card(
+                    HeroCard( title="無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉"
+                    , subtitle= '請選擇您想吃的類型： 😗'
+                    , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
+                    , CardAction(type="imBack",title="牛排",value="我想吃牛排")
+                    , CardAction(type="imBack",title="火鍋",value="我想吃火鍋")]
+                    ))
+                ])
                 await turn_context.send_activity(message)
 
 # say hello at the beginning
