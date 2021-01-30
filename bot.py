@@ -112,9 +112,9 @@ class MyBot(ActivityHandler):
                 for length in range(len(res)):
                     rest_name = res[length]
                     rest_location = find_position_with_xy(rest_name)
-                    # (x, y) = googlemaps_search_location(rest_name)
+                    (x, y) = googlemaps_search_location(rest_name)
                     history_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type="openUrl",title="地圖",
-                                value="https://www.google.com/maps/search/?api=1&query=" + str(rest_name))])))
+                                value="https://www.google.com/maps/search/?api=1&query=" + str(x)+ ',' + str(y))])))
                 message = MessageFactory.carousel(history_list)                   
                 await turn_context.send_activity(message)
         elif turn_context.activity.text == '我的最愛':
@@ -125,14 +125,12 @@ class MyBot(ActivityHandler):
                 fav_list = []
                 for length in range(len(res)):
                     rest_name = res[length]
-                    rest_location, rest_id = find_position_with_xy(rest_name)
-                    x, y = googlemaps_search_location(rest_name)
-                    print(x)
-                    # fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type='openUrl', title='導航', value="https://www.google.com/maps/search/?api=1&query=" + str(x) + "," + str(y) +"&query_place_id="+str(rest_id)])))
-                    # fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type="openUrl",title="地圖",
-                    #             value="https://www.google.com/maps/search/?api=1&query=" + rest_name)])))
-                    # value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id']
-                message = MessageFactory.carousel(fav_list)                   
+                    rest_location = find_position_with_xy(rest_name)
+                    (x, y) = googlemaps_search_location(rest_name)
+                    fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type="openUrl",title="地圖",
+                                value="https://www.google.com/maps/search/?api=1&query=" + str(x)+ ',' + str(y))])))
+                message = MessageFactory.carousel(fav_list)   
+                await turn_context.send_activity(message)                
         elif "加入最愛" in turn_context.activity.text: ## add favorite button
             rest_name = turn_context.activity.text.split("_")[0]
             message = self.favor.add_favorite(user_id, rest_name)
@@ -184,8 +182,9 @@ class MyBot(ActivityHandler):
                 message = MessageFactory.carousel(review_list)   
             else:
                 message = "未查詢到這間餐廳的相關評論文章喔～ 歡迎您發布首則評論！"
+            
             rest_name = turn_context.activity.text.split("_")[0]
-            # self.history.add_histsory(user_id, rest_name)
+            self.history.add_history(user_id, rest_name)
 
             message = MessageFactory.carousel(review_list)                   
             await turn_context.send_activity(message)
@@ -224,8 +223,10 @@ class MyBot(ActivityHandler):
         #如果推薦給使用者的都不喜歡吃 就隨機推薦
         elif turn_context.activity.text == '都不喜歡':
                 recom_list=['鍋貼','牛排','燒烤','水餃','飯','拉麵','鐵板燒','炸物','壽喜燒','吃到飽']
-                res = [random.randrange(0, 9, 1) for i in range(3)]
-           
+                #res = [random.randrange(0, 9, 1) for i in range(3)]
+                res= random.sample(range(10), 3)  #產生不重複的
+                #print("result:", list2)
+
                 message = MessageFactory.carousel([
                     CardFactory.hero_card(
                     HeroCard(
@@ -238,11 +239,20 @@ class MyBot(ActivityHandler):
                 ])
                 await turn_context.send_activity(message)
         else:
+            ## LUIS's result & intent
+            recognizer_result = await self.recognizer.recognize(turn_context)
+            # parse intent and entity 
+            intent = LuisRecognizer.top_intent(recognizer_result)
+            print(intent)
+            ## get user input and make response
+            luis_result = recognizer_result.properties["luisResult"]
+            entity=''
             if luis_result.entities:
                 entities_list =[]
                 for ll in luis_result.entities:
                     print(turn_context.activity.text)
                     print(ll)
+                    ll.entity = ll.entity.replace(" ",'')
                     entities_list.append(ll.entity)
                 print(entities_list)
                 print(len(entities_list))
@@ -252,7 +262,7 @@ class MyBot(ActivityHandler):
                 else:
                     entity = entities_list[0]+'^'+entities_list[1]
                     print("double entity:", entity)
-
+            entity = entity.replace("\x08",'')
             if entity == '':
                 message = MessageFactory.carousel([
                     CardFactory.hero_card(
@@ -274,9 +284,9 @@ class MyBot(ActivityHandler):
                         CardFactory.hero_card(
                           HeroCard(title='您想吃的食物為：' + str(entity)
                         , subtitle= '請選擇您的預算區間： 🤑'
-                        , buttons=[CardAction(type="imBack",title="$$$",value="我想吃" + str(entity) + "_$$$")
-                        , CardAction(type="imBack",title="$$",value="我想吃" + str(entity) + "_$$")
-                        , CardAction(type="imBack",title="$",value="我想吃" + str(entity) + "_$")]
+                        , buttons=[CardAction(type="imBack",title="$$$",value="我想吃"+str(entity)+"_$$$")
+                        , CardAction(type="imBack",title="$$",value="我想吃"+str(entity)+"_$$")
+                        , CardAction(type="imBack",title="$",value="我想吃"+str(entity)+"_$")]
                         ))
                 ])
                 await turn_context.send_activity(message)
