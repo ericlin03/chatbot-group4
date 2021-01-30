@@ -85,7 +85,7 @@ class MyBot(ActivityHandler):
             todaylist = []
             for tt in range(3):
                 restaurants_dict = googlemaps_API("北車", 3, todayrecom[1][tt])
-                todaylist.append(restaurants_list.append(
+                todaylist.append(
                             CardFactory.hero_card(
                                 HeroCard(
                                     title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), 
@@ -96,8 +96,8 @@ class MyBot(ActivityHandler):
                                     CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")]
                                 )
                             )
-                        ))
-            msg = MessageFactory.carousel(today_list)
+                        )
+            msg = MessageFactory.carousel(todaylist)
             await turn_context.send_activity(msg)
         elif "加入最愛" in turn_context.activity.text: ## add favorite button
             rest_name = turn_context.activity.text.split("_")[0]
@@ -152,7 +152,7 @@ class MyBot(ActivityHandler):
         # IG
         elif "_IG" in turn_context.activity.text:
             hashtag = turn_context.activity.text.split("_")[0].split(' ')[0].split('-')[0].split('/')[0].split("'")[0].split('&')[0]
-            url = 'https://www.instagram.com/explore/tags/'+hashtag
+            url = "https://www.instagram.com/explore/tags/"+str(hashtag)
 
             await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳的IG熱門貼文...")
             message = MessageFactory.carousel([
@@ -173,10 +173,12 @@ class MyBot(ActivityHandler):
 
             review_list = []
             for index in range(len(blog_re)):
-                review_list.append(CardFactory.hero_card(HeroCard(title=blog_re[index][1], images=[CardImage(url=blog_re[index][3])], buttons=[CardAction(type="openUrl",title="前往網頁",value=blog_re[index][2])])))
+                url = str(blog_re[index][2])
+                review_list.append(CardFactory.hero_card(HeroCard(title=blog_re[index][1], images=[CardImage(url=blog_re[index][3])], buttons=[CardAction(type="openUrl",title="前往網頁",value=url)])))
                             
             if re:
-                review_list.append(CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])))
+                url = str(re["愛食記"][1])
+                review_list.append(CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=url)])))
             
             if len(review_list)!=0:
                 message = MessageFactory.carousel(review_list)   
@@ -263,22 +265,8 @@ class MyBot(ActivityHandler):
                     entity = entities_list[0]+'^'+entities_list[1]
                     print("double entity:", entity)
             entity = entity.replace("\x08",'')
-            if entity == '':
-                message = MessageFactory.carousel([
-                    CardFactory.hero_card(
-                    HeroCard( title="無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉"
-                    , subtitle= '請選擇您想吃的類型： 😗'
-                    , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
-                    , CardAction(type="imBack",title="牛排",value="我想吃牛排")
-                    , CardAction(type="imBack",title="火鍋",value="我想吃火鍋")
-                    , CardAction(type="imBack", title="都不喜歡 😡", value="都不喜歡")]
-                    ))
-                ])
-                await turn_context.send_activity(message)
-                print('entity:', entity)
-
             
-            elif intent == "使用者食物類別" and "_$" not in turn_context.activity.text and "_IG" not in turn_context.activity.text:      
+            if intent == "使用者食物類別" and "_$" not in turn_context.activity.text and "_IG" not in turn_context.activity.text:      
 
                 message = MessageFactory.carousel([
                         CardFactory.hero_card(
@@ -295,7 +283,10 @@ class MyBot(ActivityHandler):
        
                 # await turn_context.send_activity(msg)
 
-            elif intent == "使用者地理位置" and "_$" not in turn_context.activity.text and "_IG" not in turn_context.activity.text:              
+            elif intent == "使用者地理位置" and "_$" not in turn_context.activity.text and "_IG" not in turn_context.activity.text:
+                if entity == "":
+                    entity = turn_context.activity.text 
+                    print(entity)             
                 message = MessageFactory.carousel([
                         CardFactory.hero_card(
                         HeroCard(title='您的所在位置為：' + str(entity)
@@ -358,7 +349,7 @@ class MyBot(ActivityHandler):
                 if(intent == '使用者食物類別'):
                     restaurants_dict = googlemaps_API("北車", money_status, msg)
                     print(restaurants_dict)
-                if(intent == '使用者地理位置'):
+                elif(intent == '使用者地理位置'):
                     restaurants_dict = googlemaps_API(msg, money_status, '')
                     print(restaurants_dict)
                 print('money_status:', money_status)
@@ -399,7 +390,16 @@ class MyBot(ActivityHandler):
                 turn_context.send_activity(turn_context.activity.address)
             # non-type
             else:
-                message = '不好意思，我聽不太明白，請說的具體一點'
+                message = MessageFactory.carousel([
+                    CardFactory.hero_card(
+                    HeroCard( title="無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉"
+                    , subtitle= '請選擇您想吃的類型： 😗'
+                    , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
+                    , CardAction(type="imBack",title="牛排",value="我想吃牛排")
+                    , CardAction(type="imBack",title="火鍋",value="我想吃火鍋")
+                    , CardAction(type="imBack", title="都不喜歡 😡", value="都不喜歡")]
+                    ))
+                ])
                 await turn_context.send_activity(message)
 
 # say hello at the beginning
