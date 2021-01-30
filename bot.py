@@ -18,6 +18,7 @@ import opendata_vegetable
 from azure.cognitiveservices.language.luis.runtime.models import LuisResult
 from weather import todaytop3eat
 import re
+import random
 import json
 
 class MyBot(ActivityHandler):
@@ -64,6 +65,15 @@ class MyBot(ActivityHandler):
 
         ## QnA Maker's response
         response = await self.qna_maker.get_answers(turn_context)
+        #check_list = await self.qna_maker.get_questions(turn_context)
+        ## LUIS's result & intent
+        recognizer_result = await self.recognizer.recognize(turn_context)
+        # parse intent and entity 
+        intent = LuisRecognizer.top_intent(recognizer_result)
+        print(intent)
+        ## get user input and make response
+        luis_result = recognizer_result.properties["luisResult"]
+        entity=''
             
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
@@ -143,7 +153,7 @@ class MyBot(ActivityHandler):
         # IG
         elif "_IG" in turn_context.activity.text:
             hashtag = turn_context.activity.text.split("_")[0].split(' ')[0].split('-')[0].split('/')[0].split("'")[0].split('&')[0]
-            url = 'https://www.instagram.com/explore/tags/'+hashtag
+            url = "https://www.instagram.com/explore/tags/"+str(hashtag)
 
             await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳的IG熱門貼文...")
             message = MessageFactory.carousel([
@@ -164,10 +174,12 @@ class MyBot(ActivityHandler):
 
             review_list = []
             for index in range(len(blog_re)):
-                review_list.append(CardFactory.hero_card(HeroCard(title=blog_re[index][1], images=[CardImage(url=blog_re[index][3])], buttons=[CardAction(type="openUrl",title="前往網頁",value=blog_re[index][2])])))
+                url = str(blog_re[index][2])
+                review_list.append(CardFactory.hero_card(HeroCard(title=blog_re[index][1], images=[CardImage(url=blog_re[index][3])], buttons=[CardAction(type="openUrl",title="前往網頁",value=url)])))
                             
             if re:
-                review_list.append(CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])))
+                url = str(re["愛食記"][1])
+                review_list.append(CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=url)])))
             
             if len(review_list)!=0:
                 message = MessageFactory.carousel(review_list)   
@@ -210,6 +222,24 @@ class MyBot(ActivityHandler):
                         break
 
                 message = MessageFactory.carousel(restaurants_list)                   
+                await turn_context.send_activity(message)
+        #如果推薦給使用者的都不喜歡吃 就隨機推薦
+        elif turn_context.activity.text == '都不喜歡':
+                recom_list=['鍋貼','牛排','燒烤','水餃','飯','拉麵','鐵板燒','炸物','壽喜燒','吃到飽']
+                #res = [random.randrange(0, 9, 1) for i in range(3)]
+                res= random.sample(range(10), 3)  #產生不重複的
+                #print("result:", list2)
+
+                message = MessageFactory.carousel([
+                    CardFactory.hero_card(
+                    HeroCard(
+                    subtitle= '請選擇您想吃的類型： 😗'
+                    , buttons=[CardAction(type="imBack", title=recom_list[res[0]], value="我想吃"+recom_list[res[0]])
+                    , CardAction(type="imBack", title=recom_list[res[1]], value="我想吃"+recom_list[res[1]])
+                    , CardAction(type="imBack", title=recom_list[res[2]], value="我想吃"+recom_list[res[2]])
+                    , CardAction(type="imBack", title="都不喜歡 😡", value="都不喜歡")]
+                    ))
+                ])
                 await turn_context.send_activity(message)
         else:
             ## LUIS's result & intent
@@ -367,7 +397,8 @@ class MyBot(ActivityHandler):
                     , subtitle= '請選擇您想吃的類型： 😗'
                     , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
                     , CardAction(type="imBack",title="牛排",value="我想吃牛排")
-                    , CardAction(type="imBack",title="火鍋",value="我想吃火鍋")]
+                    , CardAction(type="imBack",title="火鍋",value="我想吃火鍋")
+                    , CardAction(type="imBack", title="都不喜歡 😡", value="都不喜歡")]
                     ))
                 ])
                 await turn_context.send_activity(message)
