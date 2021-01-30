@@ -65,7 +65,7 @@ class MyBot(ActivityHandler):
 
         ## QnA Maker's response
         response = await self.qna_maker.get_answers(turn_context)
-
+        #check_list = await self.qna_maker.get_questions(turn_context)
         ## LUIS's result & intent
         recognizer_result = await self.recognizer.recognize(turn_context)
         # parse intent and entity 
@@ -93,36 +93,7 @@ class MyBot(ActivityHandler):
                 entity = entities_list[0]
             else:
                 entity = str(entities_list[0]+'^'+entities_list[1])
-        elif turn_context.activity.text == '都不喜歡':
-            recom_list=['鍋貼','牛排','燒烤','水餃','飯','拉麵','鐵板燒','炸物','壽喜燒','吃到飽']
-            res = [random.randrange(0, 9, 1) for i in range(3)]
-           
-            message = MessageFactory.carousel([
-                CardFactory.hero_card(
-                HeroCard(
-                subtitle= '請選擇您想吃的類型： 😗'
-                , buttons=[CardAction(type="imBack", title=recom_list[res[0]], value="我想吃"+recom_list[res[0]])
-                , CardAction(type="imBack", title=recom_list[res[1]], value="我想吃"+recom_list[res[1]])
-                , CardAction(type="imBack", title=recom_list[res[2]], value="我想吃"+recom_list[res[2]])
-                , CardAction(type="imBack", title="都不喜歡 😡", value="都不喜歡")]
-                ))
-            ])
-            await turn_context.send_activity(message)
-        else:
-            # if entity != '素食' and entity != '咖啡廳' and entity != '牛排':
-            await turn_context.send_activity("無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉")
-            message = MessageFactory.carousel([
-                CardFactory.hero_card(
-                HeroCard(
-                subtitle= '請選擇您想吃的類型： 😗'
-                , buttons=[CardAction(type="imBack", title="咖啡", value="我想喝咖啡")
-                , CardAction(type="imBack", title="火鍋", value="我想吃火鍋")
-                , CardAction(type="imBack", title="拉麵", value="我想吃拉麵")
-                , CardAction(type="imBack", title="都不喜歡 😡", value="都不喜歡")]
-                ))
-            ])
-            await turn_context.send_activity(message)
-            print('entity:', entity)
+
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
@@ -234,20 +205,53 @@ class MyBot(ActivityHandler):
                 else:
                     entity = str(entities_list[0]+'^'+entities_list[1])
 
+
             # 書文的func
-            elif entity == '':
+            elif turn_context.activity.text == '都不喜歡':
+                recom_list=['鍋貼','牛排','燒烤','水餃','飯','拉麵','鐵板燒','炸物','壽喜燒','吃到飽']
+                res = [random.randrange(0, 9, 1) for i in range(3)]
+           
+                message = MessageFactory.carousel([
+                    CardFactory.hero_card(
+                    HeroCard(
+                    subtitle= '請選擇您想吃的類型： 😗'
+                    , buttons=[CardAction(type="imBack", title=recom_list[res[0]], value="我想吃"+recom_list[res[0]])
+                    , CardAction(type="imBack", title=recom_list[res[1]], value="我想吃"+recom_list[res[1]])
+                    , CardAction(type="imBack", title=recom_list[res[2]], value="我想吃"+recom_list[res[2]])
+                    , CardAction(type="imBack", title="都不喜歡 😡", value="都不喜歡")]
+                    ))
+                ])
+                await turn_context.send_activity(message)
+            elif entity == '': #and turn_context.activity.text not in check_list:
+                # if entity != '素食' and entity != '咖啡廳' and entity != '牛排':
                 await turn_context.send_activity("無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉")
                 message = MessageFactory.carousel([
                     CardFactory.hero_card(
                     HeroCard(
                     subtitle= '請選擇您想吃的類型： 😗'
-                    , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
-                    , CardAction(type="imBack",title="牛排",value="我想吃牛排")
-                    , CardAction(type="imBack",title="素食",value="我想吃素食")]
+                    , buttons=[CardAction(type="imBack", title="咖啡", value="我想喝咖啡")
+                    , CardAction(type="imBack", title="火鍋", value="我想吃火鍋")
+                    , CardAction(type="imBack", title="拉麵", value="我想吃拉麵")
+                    , CardAction(type="imBack", title="都不喜歡 😡", value="都不喜歡")]
                     ))
                 ])
                 await turn_context.send_activity(message)
                 print('entity:', entity)
+
+
+            # elif entity == '' and turn_context.activity.text not in check_list:
+            #     await turn_context.send_activity("無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉")
+            #     message = MessageFactory.carousel([
+            #         CardFactory.hero_card(
+            #         HeroCard(
+            #         subtitle= '請選擇您想吃的類型： 😗'
+            #         , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
+            #         , CardAction(type="imBack",title="牛排",value="我想吃牛排")
+            #         , CardAction(type="imBack",title="素食",value="我想吃素食")]
+            #         ))
+            #     ])
+            #     await turn_context.send_activity(message)
+            #     print('entity:', entity)
         # 判斷intent
 
             # 書文的func
@@ -282,18 +286,6 @@ class MyBot(ActivityHandler):
                     message = MessageFactory.carousel(restaurants_list)                   
                     await turn_context.send_activity(message)
 
-            elif entity == '':
-                message = MessageFactory.carousel([
-                    CardFactory.hero_card(
-                    HeroCard( title="無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉"
-                    , subtitle= '請選擇您想吃的類型： 😗'
-                    , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
-                    , CardAction(type="imBack",title="牛排",value="我想吃牛排")
-                    , CardAction(type="imBack",title="火鍋",value="我想吃火鍋")]
-                    ))
-                ])
-                await turn_context.send_activity(message)
-                print('entity:', entity)
 
 
             elif intent == "使用者食物類別" and "_$" not in turn_context.activity.text and "_IG" not in turn_context.activity.text:      
