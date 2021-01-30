@@ -74,30 +74,7 @@ class MyBot(ActivityHandler):
         ## get user input and make response
         luis_result = recognizer_result.properties["luisResult"]
         entity=''
-<<<<<<< HEAD
-        # if('我想吃咖啡廳' == turn_context.activity.text):
-        #     entity='咖啡廳'
-        # if('我想吃牛排' == turn_context.activity.text):
-        #     entity='牛排'
-        # if('我想吃素食' == turn_context.activity.text):
-        #     entity='素食'
-
-        if luis_result.entities:
-            entities_list =[]
-            for ll in luis_result.entities:
-                print(turn_context.activity.text)
-                print(ll)
-                entities_list.append(ll.entity)
-            print(entities_list)
-            print(len(entities_list))
-            if len(entities_list) == 1:
-                entity = entities_list[0]
-            else:
-                entity = str(entities_list[0]+'^'+entities_list[1])
-
-=======
             
->>>>>>> 665e7175334f7225a75fad2f2918d58b0de0f107
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
@@ -244,25 +221,8 @@ class MyBot(ActivityHandler):
 
                 message = MessageFactory.carousel(restaurants_list)                   
                 await turn_context.send_activity(message)
-        else:
-            if luis_result.entities:
-                entities_list =[]
-                for ll in luis_result.entities:
-                    print(turn_context.activity.text)
-                    print(ll)
-                    entities_list.append(ll.entity)
-                print(entities_list)
-                print(len(entities_list))
-                if len(entities_list) == 1:
-                    entity = entities_list[0]
-                # two entites situation
-                else:
-<<<<<<< HEAD
-                    entity = str(entities_list[0]+'^'+entities_list[1])
-
-
-            # 書文的func
-            elif turn_context.activity.text == '都不喜歡':
+        #如果推薦給使用者的都不喜歡吃 就隨機推薦
+        elif turn_context.activity.text == '都不喜歡':
                 recom_list=['鍋貼','牛排','燒烤','水餃','飯','拉麵','鐵板燒','炸物','壽喜燒','吃到飽']
                 res = [random.randrange(0, 9, 1) for i in range(3)]
            
@@ -277,71 +237,19 @@ class MyBot(ActivityHandler):
                     ))
                 ])
                 await turn_context.send_activity(message)
-            elif entity == '': #and turn_context.activity.text not in check_list:
-                # if entity != '素食' and entity != '咖啡廳' and entity != '牛排':
-                await turn_context.send_activity("無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉")
-                message = MessageFactory.carousel([
-                    CardFactory.hero_card(
-                    HeroCard(
-                    subtitle= '請選擇您想吃的類型： 😗'
-                    , buttons=[CardAction(type="imBack", title="咖啡", value="我想喝咖啡")
-                    , CardAction(type="imBack", title="火鍋", value="我想吃火鍋")
-                    , CardAction(type="imBack", title="拉麵", value="我想吃拉麵")
-                    , CardAction(type="imBack", title="都不喜歡 😡", value="都不喜歡")]
-                    ))
-                ])
-                await turn_context.send_activity(message)
-                print('entity:', entity)
-
-
-            # elif entity == '' and turn_context.activity.text not in check_list:
-            #     await turn_context.send_activity("無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉")
-            #     message = MessageFactory.carousel([
-            #         CardFactory.hero_card(
-            #         HeroCard(
-            #         subtitle= '請選擇您想吃的類型： 😗'
-            #         , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
-            #         , CardAction(type="imBack",title="牛排",value="我想吃牛排")
-            #         , CardAction(type="imBack",title="素食",value="我想吃素食")]
-            #         ))
-            #     ])
-            #     await turn_context.send_activity(message)
-            #     print('entity:', entity)
-        # 判斷intent
-
-            # 書文的func
-
-            # line address
-            elif ("{" in turn_context.activity.text and "}" in turn_context.activity.text):
-                line_address_json = json.loads(turn_context.activity.text)
-                print('line_address_json', line_address_json)
-                x = line_address_json['latitude']
-                y = line_address_json['longitude']
-                restaurants_dict = googlemaps_search_nearby(x ,y ,'steak')
-                # 沒有餐廳的狀況
-                if(len(restaurants_dict) == 0):
-                    message = "您附近沒有相對應的餐廳可以推薦呦，輸入『吃』來繼續👀"   
+        else:
+            if luis_result.entities:
+                entities_list =[]
+                for ll in luis_result.entities:
+                    print(turn_context.activity.text)
+                    print(ll)
+                    entities_list.append(ll.entity)
+                print(entities_list)
+                print(len(entities_list))
+                if len(entities_list) == 1:
+                    entity = entities_list[0]
+                # two entites situation
                 else:
-                    restaurants_list=[]
-                    for i in range(len(restaurants_dict)):
-                        restaurants_list.append(
-                            CardFactory.hero_card(
-                                HeroCard(
-                                    title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating'])+ "👍", 
-                                    images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
-                                    buttons=[CardAction(type="openUrl",title="地圖",
-                                    value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
-                                    CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
-                                    CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
-                                )
-                        ))
-                        if(i==10):
-                            break
-
-                    message = MessageFactory.carousel(restaurants_list)                   
-                    await turn_context.send_activity(message)
-
-=======
                     entity = entities_list[0]+'^'+entities_list[1]
                     print("double entity:", entity)
 
@@ -352,14 +260,14 @@ class MyBot(ActivityHandler):
                     , subtitle= '請選擇您想吃的類型： 😗'
                     , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
                     , CardAction(type="imBack",title="牛排",value="我想吃牛排")
-                    , CardAction(type="imBack",title="火鍋",value="我想吃火鍋")]
+                    , CardAction(type="imBack",title="火鍋",value="我想吃火鍋")
+                    , CardAction(type="imBack", title="都不喜歡 😡", value="都不喜歡")]
                     ))
                 ])
                 await turn_context.send_activity(message)
                 print('entity:', entity)
->>>>>>> 665e7175334f7225a75fad2f2918d58b0de0f107
 
-
+            
             elif intent == "使用者食物類別" and "_$" not in turn_context.activity.text and "_IG" not in turn_context.activity.text:      
 
                 message = MessageFactory.carousel([
