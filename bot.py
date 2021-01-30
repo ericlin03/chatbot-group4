@@ -80,7 +80,6 @@ class MyBot(ActivityHandler):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
     # 個人化推薦
         elif turn_context.activity.text == '個人化推薦':
-            await turn_context.send_activity('success in')
             todayrecom = todaytop3eat()
             await turn_context.send_activity("今天最低溫為 %s, 為您推薦以下料理："%todayrecom[0])
             todaylist = []
@@ -157,7 +156,7 @@ class MyBot(ActivityHandler):
 
             await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳的IG熱門貼文...")
             message = MessageFactory.carousel([
-                CardFactory.hero_card(HeroCard(title=hashtag+'的IG熱門文章',images=[CardImage(url='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB1DfQKJ-vfC16ybbNPP0N7FVVV6bNEC3W9Q&usqp=CAU')], buttons=[CardAction(type="openUrl",title="前往IG熱門文章",value=url)]))
+                CardFactory.hero_card(HeroCard(title=hashtag+'的IG熱門文章',images=[CardImage(url='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB1DfQKJ-vfC16ybbNPP0N7FVVV6bNEC3W9Q&usqp=CAU')], buttons=[CardAction(type="openUrl",title="前往IG熱門文章",value=str(url))]))
             ])                   
 
             await turn_context.send_activity(message) 
@@ -175,11 +174,11 @@ class MyBot(ActivityHandler):
             review_list = []
             for index in range(len(blog_re)):
                 url = str(blog_re[index][2])
-                review_list.append(CardFactory.hero_card(HeroCard(title=blog_re[index][1], images=[CardImage(url=blog_re[index][3])], buttons=[CardAction(type="openUrl",title="前往網頁",value=url)])))
+                review_list.append(CardFactory.hero_card(HeroCard(title=blog_re[index][1], images=[CardImage(url=blog_re[index][3])], buttons=[CardAction(type="openUrl",title="前往網頁",value=str(url))])))
                             
             if re:
                 url = str(re["愛食記"][1])
-                review_list.append(CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=url)])))
+                review_list.append(CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=str(url))])))
             
             if len(review_list)!=0:
                 message = MessageFactory.carousel(review_list)   
@@ -218,7 +217,7 @@ class MyBot(ActivityHandler):
                                 CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
                             )
                     ))
-                    if(i==10):
+                    if(i==9):
                         break
 
                 message = MessageFactory.carousel(restaurants_list)                   
@@ -323,7 +322,7 @@ class MyBot(ActivityHandler):
                                     CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
                                 )
                         ))
-                        if(i==10):
+                        if(i==9):
                             break
 
                     message = MessageFactory.carousel(restaurants_list)                   
@@ -381,7 +380,7 @@ class MyBot(ActivityHandler):
               
                         
        
-                        if(i == 10):
+                        if(i == 9):
                             break
 
                     message = MessageFactory.carousel(restaurants_list)                   
