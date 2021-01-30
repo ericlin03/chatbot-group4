@@ -104,6 +104,7 @@ class MyBot(ActivityHandler):
             todaylist = []
             for tt in range(3):
                 restaurants_dict = googlemaps_API("北車", 3, todayrecom[1][tt])
+                print(restaurants_dict)
                 todaylist.append(
                             CardFactory.hero_card(
                                 HeroCard(
@@ -169,7 +170,8 @@ class MyBot(ActivityHandler):
             # 佑誠的func
             blog_re=[]
             blog_re = blogcrawler(turn_context.activity.text)
-
+            print(re)
+            print(blog_re)
 
             review_list = []
             for index in range(len(blog_re)):
