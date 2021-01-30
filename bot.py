@@ -70,6 +70,7 @@ class MyBot(ActivityHandler):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
     # 個人化推薦
         elif turn_context.activity.text == '個人化推薦':
+            await turn_context.send_activity('success in')
             todayrecom = todaytop3eat()
             await turn_context.send_activity("今天最低溫為 %s, 為您推薦以下料理："%todayrecom[0])
             todaylist = []
