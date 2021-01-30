@@ -16,6 +16,6 @@ class DefaultConfig:
     QNA_ENDPOINT_HOST = os.environ.get("QnAEndpointHostName", "https://restaurant-recom-qna.azurewebsites.net/qnamaker")
 
     LUIS_APP_ID = os.environ.get("LuisAppId", "cc1ccd7e-f2e6-4ad5-be28-22dc51f946f8")   
-    LUIS_API_KEY = os.environ.get("LuisAPIKey", "bee5416c51f94f4da243226ed9940ba7")
+    LUIS_API_KEY = os.environ.get("LuisAPIKey", "b63be5774c0c401bb3d4c659275f1917")
     # LUIS endpoint host name, ie "westus.api.cognitive.microsoft.com"
     LUIS_API_HOST_NAME = os.environ.get("LuisAPIHostName", "westus.api.cognitive.microsoft.com")
