@@ -152,11 +152,11 @@ class MyBot(ActivityHandler):
         # IG
         elif "_IG" in turn_context.activity.text:
             hashtag = turn_context.activity.text.split("_")[0].split(' ')[0].split('-')[0].split('/')[0].split("'")[0].split('&')[0]
-            url = "https://www.instagram.com/explore/tags/"+str(hashtag)
-
+            # url = "https://www.instagram.com/explore/tags/"+str(hashtag)
+            # print(url)
             await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳的IG熱門貼文...")
             asa = []
-            asa.append(CardFactory.hero_card(HeroCard(title=hashtag+'的IG熱門文章',images=[CardImage(url='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB1DfQKJ-vfC16ybbNPP0N7FVVV6bNEC3W9Q&usqp=CAU')], buttons=[CardAction(type="openUrl",title="前往IG熱門文章",value=str(url))])))
+            asa.append(CardFactory.hero_card(HeroCard(title=hashtag+'的IG熱門文章',images=[CardImage(url='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB1DfQKJ-vfC16ybbNPP0N7FVVV6bNEC3W9Q&usqp=CAU')], buttons=[CardAction(type="openUrl",title="前往IG熱門文章",value="https://www.instagram.com/explore/tags/"+str(hashtag))])))
             message = MessageFactory.carousel(asa)                   
 
             await turn_context.send_activity(message) 
