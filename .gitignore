@@ -1,0 +1,12 @@
+__init__.py
+echo-bot.zip
+__pycache__
+deploymentTemplates
+.DS_Store
+bots_functions/__pycache__
+台北素食.csv
+臺北市自備餐具優惠業者清單.csv
+.pylintrc
+.github
+.vs
+.vscode
